@@ -1,0 +1,7 @@
+# Token File environment file
+.envrc
+
+# Terraform and Terragrunt
+.terraform
+.terragrunt-cache
+.terraform.lock.hcl

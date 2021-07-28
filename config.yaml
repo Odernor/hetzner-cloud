@@ -1,0 +1,29 @@
+config:
+  ssh:
+    name: kubesshkey
+    ssh_key_file: ~/.ssh/id_rsa.pub
+  network:
+    name: kubernetes
+    network_ip_range: 10.0.0.0/8
+    subnet_ip_range: 10.0.1.0/24
+    type: cloud
+    network_zone: eu-central
+  kubernetes:
+    name: kube
+    server_type: cx21
+    image: ubuntu-20.04
+    location: nbg1
+    number_of_nodes: 2
+    kubernetes_version: v1.21.3
+    # random token. Format: [a-z0-9]{6}\.[a-z0-9]{16} or use: kubeadm token generate
+    # This token is valid for 1 hour to join nodes on initial setup
+    # When raising the number_of_nodes variable make sure to get valid token from running kubernetes
+    kubernetes_token: 1yl44y.g0t8eqio706q08pp
+    kubernetes_config: ~/.kube/config_hetzner
+
+kubernetes:
+  istio:
+    enabled: true
+    istio_ingressgateway:
+      helm_values:
+        gateways.istio-ingressgateway.serviceAnnotations.load-balancer.hetzner.cloud/location: nbg1
