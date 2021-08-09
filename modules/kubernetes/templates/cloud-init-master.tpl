@@ -1,13 +1,24 @@
 #cloud-config
 
+%{ if create_disk == "true" }
+disk_setup:
+  /dev/sdb:
+    table_type: 'mbr'
+    layout: true
+    overwrite: false
+
+fs_setup:
+  - label: data
+    filesystem: 'ext4'
+    device: /dev/sdb
+    partition: sdb1
+    overwrite: false
+
+mounts:
+  - ["/dev/sdb1", "/data"]
+%{ endif }
+
 write_files:
-  - content: |
-      network:
-        version: 2
-        ethernets:
-          eth0:
-            addresses: [${floating_ip}/32]
-    path: /etc/netplan/60-floating-ip.yaml
   - content: |
       [Service]
       Environment="KUBELET_EXTRA_ARGS=--cloud-provider=external"
@@ -73,5 +84,5 @@ packages:
 runcmd:
   - systemctl daemon-reload
   - sysctl -f --system
-  - kubeadm init --token ${kubernetes_token} --token-ttl 1h --pod-network-cidr=10.244.0.0/16 --kubernetes-version=${kubernetes_version} --ignore-preflight-errors=NumCPU --apiserver-cert-extra-sans=${kubernetes_master_ip}
+  - kubeadm init --token ${kubernetes_token} --token-ttl 1h --pod-network-cidr=10.244.0.0/16 --kubernetes-version=${kubernetes_version} --ignore-preflight-errors=KubeletVersion --apiserver-cert-extra-sans=${kubernetes_master_ip}
   - sh /run/kubernetes_init.sh

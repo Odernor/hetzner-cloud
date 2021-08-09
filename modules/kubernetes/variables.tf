@@ -2,9 +2,9 @@
 # module variables
 
 variable "hcloud_token" {
-    type = string
+  type = string
 }
 
 variable "config" {
-    type = map(any)
+  type = map(any)
 }

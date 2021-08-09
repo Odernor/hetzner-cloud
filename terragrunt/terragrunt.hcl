@@ -2,9 +2,9 @@
 # main terragrunt hcl
 
 generate "provider" {
-  path = "provider.tf"
+  path      = "provider.tf"
   if_exists = "overwrite_terragrunt"
-  contents = <<EOF
+  contents  = <<EOF
 provider "hcloud" {
   token = var.hcloud_token
 }
@@ -20,6 +20,10 @@ terraform {
     hcloud = {
       source = "hetznercloud/hcloud"
       version = "~> 1.27"
+    }
+    kubectl = {
+      source = "gavinbunney/kubectl"
+      version = "1.11.2"
     }
   }
 }

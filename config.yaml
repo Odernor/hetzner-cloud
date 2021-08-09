@@ -8,22 +8,71 @@ config:
     subnet_ip_range: 10.0.1.0/24
     type: cloud
     network_zone: eu-central
-  kubernetes:
+  kubernetes_hosts:
     name: kube
     server_type: cx21
     image: ubuntu-20.04
     location: nbg1
-    number_of_nodes: 2
+    number_of_nodes: 3
     kubernetes_version: v1.21.3
     # random token. Format: [a-z0-9]{6}\.[a-z0-9]{16} or use: kubeadm token generate
     # This token is valid for 1 hour to join nodes on initial setup
     # When raising the number_of_nodes variable make sure to get valid token from running kubernetes
     kubernetes_token: 1yl44y.g0t8eqio706q08pp
     kubernetes_config: ~/.kube/config_hetzner
-
-kubernetes:
+  additional_volume:
+    create: true
+    size: 10
+    mountpoint: /data
+    
+kubernetes_services:
   istio:
     enabled: true
     istio_ingressgateway:
       helm_values:
-        gateways.istio-ingressgateway.serviceAnnotations.load-balancer.hetzner.cloud/location: nbg1
+        gateways.istio-ingressgateway.serviceAnnotations.load-balancer\.hetzner\.cloud/location: nbg1
+        gateways.istio-ingressgateway.serviceAnnotations.load-balancer\.hetzner\.cloud/name: kubelb
+        gateways.istio-ingressgateway.type: LoadBalancer
+        gateways.istio-ingressgateway.autoscaleMin: 3
+        gateways.istio-ingressgateway.autoscaleMax: 5
+
+helm_charts:
+  cert-manager:
+    namespace: istio-system
+    reponame: https://charts.jetstack.io
+    chartname: cert-manager
+    chartversion: 1.4.3
+    values:
+      installCRDs: true
+    ingress:
+      source_port: dummy
+      target_port: dummy
+  apache:
+    name: apache
+    namespace: apache
+    reponame: https://charts.bitnami.com/bitnami
+    chartname: apache
+    chartversion: 8.5.10
+    values:
+      replicaCount: 2
+      service.type: NodePort
+    istio-ingress:
+      create: true
+    gateway:
+      port1:
+        number: 80
+        protocol: HTTP
+        name: http
+      port2:
+        number: 81
+        protocol: TCP
+        name: test
+    virtualservice:
+      hosts: "*"
+      prefix: /apache
+      rewrite: /
+
+
+
+    
+

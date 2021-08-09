@@ -3,11 +3,11 @@ include {
 }
 
 terraform {
-  source = "../../modules/kubernetes_istio/"
+  source = "../../modules/kubernetes_helm_services/"
 }
 
 dependencies {
-  paths = ["../kubernetes"]
+  paths = ["../kubernetes", "../kubernetes_istio"]
 }
 
 locals {
@@ -15,5 +15,6 @@ locals {
 }
 
 inputs = merge(
-  local.config
+  local.config,
+  local.config.helm_charts.apache
 )
